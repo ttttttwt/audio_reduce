@@ -1,0 +1,118 @@
+{% extends "base.html" %} {% block title %}Tham gia phòng - Video Call App{%
+endblock %} {% block content %}
+<div class="container mx-auto px-4 py-12">
+  <div class="max-w-md mx-auto">
+    <div class="bg-gray-800 rounded-xl p-8 border border-gray-700">
+      <div class="text-center mb-8">
+        <i class="fas fa-door-open text-4xl text-green-400 mb-4"></i>
+        <h1 class="text-3xl font-bold mb-2">Tham gia phòng họp</h1>
+        <p class="text-gray-400">Nhập thông tin để tham gia cuộc họp</p>
+      </div>
+
+      <form onsubmit="joinRoom(event)" class="space-y-6">
+        <div>
+          <label
+            for="username"
+            class="block text-sm font-medium text-gray-300 mb-2"
+          >
+            Tên của bạn
+          </label>
+          <input
+            type="text"
+            id="username"
+            name="username"
+            required
+            class="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg focus:border-green-500 focus:outline-none text-white"
+            placeholder="Nhập tên hiển thị"
+          />
+        </div>
+
+        <div>
+          <label
+            for="roomId"
+            class="block text-sm font-medium text-gray-300 mb-2"
+          >
+            Mã phòng
+          </label>
+          <input
+            type="text"
+            id="roomId"
+            name="roomId"
+            required
+            class="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg focus:border-green-500 focus:outline-none text-white font-mono"
+            placeholder="Nhập mã phòng 8 ký tự"
+          />
+        </div>
+
+        <button
+          type="submit"
+          class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg transition-colors flex items-center justify-center"
+        >
+          <i class="fas fa-sign-in-alt mr-2"></i>
+          Tham gia ngay
+        </button>
+      </form>
+
+      <div class="mt-6 text-center">
+        <a href="/" class="text-blue-400 hover:text-blue-300 text-sm">
+          <i class="fas fa-arrow-left mr-1"></i>
+          Quay lại trang chủ
+        </a>
+      </div>
+    </div>
+
+    <!-- Hướng dẫn -->
+    <div class="mt-8 bg-gray-800 rounded-lg p-6 border border-gray-700">
+      <h3 class="text-lg font-bold mb-4 text-center">Hướng dẫn sử dụng</h3>
+      <div class="space-y-3 text-sm text-gray-300">
+        <div class="flex items-start">
+          <i class="fas fa-info-circle text-blue-400 mt-1 mr-3"></i>
+          <span>Mã phòng gồm 8 ký tự được tạo tự động khi tạo phòng mới</span>
+        </div>
+        <div class="flex items-start">
+          <i class="fas fa-user text-green-400 mt-1 mr-3"></i>
+          <span>Tên hiển thị sẽ được các người khác trong phòng nhìn thấy</span>
+        </div>
+        <div class="flex items-start">
+          <i class="fas fa-camera text-purple-400 mt-1 mr-3"></i>
+          <span>Trình duyệt sẽ xin quyền truy cập camera và microphone</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %} {% block scripts %}
+<script>
+  function joinRoom(event) {
+    event.preventDefault();
+
+    const username = document.getElementById("username").value.trim();
+    const roomId = document.getElementById("roomId").value.trim();
+
+    if (!username || !roomId) {
+      alert("Vui lòng nhập đầy đủ thông tin");
+      return;
+    }
+
+    if (roomId.length !== 8) {
+      alert("Mã phòng phải có đúng 8 ký tự");
+      return;
+    }
+
+    // Chuyển đến phòng chờ (lobby)
+    window.location.href = `/lobby/${roomId}?username=${encodeURIComponent(
+      username
+    )}`;
+  }
+
+  // Auto-focus vào username khi trang load
+  window.addEventListener("load", () => {
+    document.getElementById("username").focus();
+  });
+
+  // Tự động format mã phòng (chuyển thành chữ hoa)
+  document.getElementById("roomId").addEventListener("input", (e) => {
+    e.target.value = e.target.value.toUpperCase();
+  });
+</script>
+{% endblock %}

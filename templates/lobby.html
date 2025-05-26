@@ -1,0 +1,371 @@
+{% extends "base.html" %} {% block title %}Chuẩn bị tham gia - Video Call App{%
+endblock %} {% block nav_items %}
+<!-- No nav items for lobby -->
+{% endblock %} {% block content %}
+<div class="flex flex-col items-center justify-center min-h-full py-8 px-4">
+  <div
+    class="bg-gray-800 rounded-xl p-6 sm:p-8 border border-gray-700 w-full max-w-2xl"
+  >
+    <div class="text-center mb-6">
+      <h1 class="text-2xl sm:text-3xl font-bold mb-2">
+        Sẵn sàng tham gia phòng "{{ room_id }}"?
+      </h1>
+      <p class="text-gray-400">
+        Bạn sẽ tham gia với tên:
+        <span class="font-semibold text-blue-400">{{ username }}</span>
+      </p>
+      <p class="text-sm text-yellow-400 mt-2">
+        <i class="fas fa-hourglass-half mr-1"></i>Kiểm tra thiết bị của bạn
+        trước khi tham gia.
+      </p>
+    </div>
+
+    <!-- Video Preview -->
+    <div class="bg-black rounded-lg overflow-hidden aspect-video mb-6 relative">
+      <video
+        id="lobbyVideo"
+        autoplay
+        muted
+        playsinline
+        class="w-full h-full object-cover"
+      ></video>
+      <div
+        id="noCameraMessage"
+        class="absolute inset-0 flex items-center justify-center text-gray-400 hidden"
+      >
+        <i class="fas fa-video-slash fa-2x mr-2"></i> Camera đang tắt hoặc không
+        có sẵn
+      </div>
+    </div>
+
+    <!-- Controls -->
+    <div class="flex items-center justify-center space-x-3 sm:space-x-4 mb-8">
+      <button
+        id="toggleVideoLobby"
+        onclick="toggleVideoLobby()"
+        class="control-btn bg-gray-700 hover:bg-gray-600 transition-colors"
+      >
+        <i class="fas fa-video text-white"></i>
+      </button>
+      <button
+        id="toggleAudioLobby"
+        onclick="toggleAudioLobby()"
+        class="control-btn bg-gray-700 hover:bg-gray-600 transition-colors relative"
+      >
+        <i class="fas fa-microphone text-white"></i>
+        <span class="mic-animation"></span>
+      </button>
+    </div>
+
+    <button
+      onclick="joinRoomFromLobby()"
+      class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg transition-colors text-base sm:text-lg"
+    >
+      Tham gia ngay
+    </button>
+
+    <div class="mt-6 text-center">
+      <a href="/" class="text-blue-400 hover:text-blue-300 text-sm">
+        <i class="fas fa-arrow-left mr-1"></i>
+        Quay lại trang chủ
+      </a>
+    </div>
+  </div>
+</div>
+{% endblock %} {% block scripts %}
+<script>
+  const roomId = "{{ room_id }}";
+  const username = "{{ username }}";
+  let lobbyStream = null;
+  let isVideoEnabledLobby = true;
+  let isAudioEnabledLobby = true;
+
+  const lobbyVideo = document.getElementById("lobbyVideo");
+  const noCameraMessage = document.getElementById("noCameraMessage");
+
+  async function getLobbyStream() {
+    try {
+      lobbyStream = await navigator.mediaDevices.getUserMedia({
+        video: true,
+        audio: true,
+      });
+      lobbyVideo.srcObject = lobbyStream;
+      noCameraMessage.classList.add("hidden");
+      lobbyVideo.classList.remove("hidden");
+
+      // Apply initial states
+      lobbyStream
+        .getVideoTracks()
+        .forEach((track) => (track.enabled = isVideoEnabledLobby));
+      lobbyStream
+        .getAudioTracks()
+        .forEach((track) => (track.enabled = isAudioEnabledLobby));
+
+      updateButtonUI(
+        "toggleVideoLobby",
+        "fa-video",
+        "fa-video-slash",
+        isVideoEnabledLobby
+      );
+      updateButtonUI(
+        "toggleAudioLobby",
+        "fa-microphone",
+        "fa-microphone-slash",
+        isAudioEnabledLobby
+      );
+
+      if (isAudioEnabledLobby) {
+        startMicrophoneVisualization();
+      }
+    } catch (error) {
+      console.error("Error accessing media devices in lobby:", error);
+      noCameraMessage.classList.remove("hidden");
+      lobbyVideo.classList.add("hidden");
+      // Disable buttons if no stream
+      document.getElementById("toggleVideoLobby").disabled = true;
+      document.getElementById("toggleAudioLobby").disabled = true;
+      isVideoEnabledLobby = false;
+      isAudioEnabledLobby = false;
+      updateButtonUI("toggleVideoLobby", "fa-video", "fa-video-slash", false);
+      updateButtonUI(
+        "toggleAudioLobby",
+        "fa-microphone",
+        "fa-microphone-slash",
+        false
+      );
+    }
+  }
+
+  function startMicrophoneVisualization() {
+    if (!isAudioEnabledLobby || !lobbyStream) return;
+
+    const audioContext = new (window.AudioContext ||
+      window.webkitAudioContext)();
+    const analyser = audioContext.createAnalyser();
+    const microphone = audioContext.createMediaStreamSource(lobbyStream);
+    microphone.connect(analyser);
+
+    analyser.fftSize = 256;
+    const bufferLength = analyser.frequencyBinCount;
+    const dataArray = new Uint8Array(bufferLength);
+
+    const micButton = document.getElementById("toggleAudioLobby");
+
+    function animate() {
+      if (!isAudioEnabledLobby) {
+        micButton.classList.remove("speaking");
+        return;
+      }
+
+      requestAnimationFrame(animate);
+      analyser.getByteFrequencyData(dataArray);
+
+      // Calculate average frequency
+      let sum = 0;
+      for (let i = 0; i < bufferLength; i++) {
+        sum += dataArray[i];
+      }
+      const average = sum / bufferLength;
+
+      // Add visual feedback when speaking
+      if (average > 35) {
+        // Threshold for speaking detection
+        micButton.classList.add("speaking");
+      } else {
+        micButton.classList.remove("speaking");
+      }
+
+      // Update animation intensity
+      const scale = 1 + (average / 128) * 0.3;
+      const micAnimation = micButton.querySelector(".mic-animation");
+      if (micAnimation) {
+        micAnimation.style.transform = `translate(-50%, -50%) scale(${scale})`;
+      }
+    }
+
+    animate();
+  }
+
+  function updateButtonUI(
+    buttonId,
+    iconClassEnabled,
+    iconClassDisabled,
+    isEnabled
+  ) {
+    const button = document.getElementById(buttonId);
+    const icon = button.querySelector("i");
+    if (isEnabled) {
+      button.className =
+        "control-btn bg-gray-700 hover:bg-gray-600 transition-colors relative";
+      icon.className = `fas ${iconClassEnabled} text-white text-base sm:text-lg`;
+    } else {
+      button.className =
+        "control-btn bg-red-600 hover:bg-red-700 transition-colors relative";
+      icon.className = `fas ${iconClassDisabled} text-white text-base sm:text-lg`;
+    }
+    if (buttonId === "toggleVideoLobby") {
+      if (lobbyStream && lobbyStream.getVideoTracks().length > 0) {
+        noCameraMessage.classList.toggle("hidden", isEnabled);
+        lobbyVideo.classList.toggle("hidden", !isEnabled);
+      } else if (!lobbyStream) {
+        noCameraMessage.classList.remove("hidden");
+        lobbyVideo.classList.add("hidden");
+      }
+    }
+  }
+
+  function toggleVideoLobby() {
+    if (!lobbyStream || lobbyStream.getVideoTracks().length === 0) return;
+    isVideoEnabledLobby = !isVideoEnabledLobby;
+    lobbyStream
+      .getVideoTracks()
+      .forEach((track) => (track.enabled = isVideoEnabledLobby));
+    updateButtonUI(
+      "toggleVideoLobby",
+      "fa-video",
+      "fa-video-slash",
+      isVideoEnabledLobby
+    );
+  }
+
+  function toggleAudioLobby() {
+    // Audio is not previewed, but state is tracked for joining the room
+    if (!lobbyStream || lobbyStream.getAudioTracks().length === 0) return;
+    isAudioEnabledLobby = !isAudioEnabledLobby;
+    // We don't enable/disable audio tracks here as it's not previewed,
+    // but the state is important for when joining the actual room.
+    updateButtonUI(
+      "toggleAudioLobby",
+      "fa-microphone",
+      "fa-microphone-slash",
+      isAudioEnabledLobby
+    );
+  }
+
+  function joinRoomFromLobby() {
+    // Stop lobby stream before navigating
+    if (lobbyStream) {
+      lobbyStream.getTracks().forEach((track) => track.stop());
+    }
+    window.location.href = `/room/${roomId}?username=${encodeURIComponent(
+      username
+    )}&video=${isVideoEnabledLobby}&audio=${isAudioEnabledLobby}`;
+  }
+
+  window.addEventListener("load", getLobbyStream);
+
+  // Cleanup lobby stream when page is left (e.g. back button)
+  window.addEventListener("beforeunload", () => {
+    if (lobbyStream) {
+      lobbyStream.getTracks().forEach((track) => track.stop());
+    }
+  });
+</script>
+
+<style>
+  /* Perfect circle control buttons */
+  .control-btn {
+    width: 44px !important;
+    height: 44px !important;
+    border-radius: 50% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    position: relative;
+    overflow: hidden;
+  }
+
+  @media (min-width: 640px) {
+    .control-btn {
+      width: 50px !important;
+      height: 50px !important;
+    }
+  }
+
+  .control-btn i {
+    font-size: 1.25rem;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2;
+  }
+
+  /* Microphone animation */
+  .mic-animation {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(1);
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    pointer-events: none;
+  }
+
+  .mic-animation::before,
+  .mic-animation::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border-radius: 50%;
+    animation: pulse 2s linear infinite;
+  }
+
+  .mic-animation::before {
+    background: radial-gradient(
+      circle,
+      rgba(59, 130, 246, 0.6) 0%,
+      transparent 70%
+    );
+    animation-delay: 0s;
+  }
+
+  .mic-animation::after {
+    background: radial-gradient(
+      circle,
+      rgba(147, 51, 234, 0.5) 0%,
+      transparent 70%
+    );
+    animation-delay: 0.5s;
+  }
+
+  @keyframes pulse {
+    0% {
+      transform: scale(0.95);
+      opacity: 0.5;
+    }
+    50% {
+      transform: scale(1.05);
+      opacity: 0.3;
+    }
+    100% {
+      transform: scale(0.95);
+      opacity: 0.5;
+    }
+  }
+
+  .speaking .mic-animation::before {
+    background: radial-gradient(
+      circle,
+      rgba(52, 211, 153, 0.7) 0%,
+      transparent 70%
+    );
+    animation: pulse 0.5s linear infinite;
+  }
+
+  .speaking .mic-animation::after {
+    background: radial-gradient(
+      circle,
+      rgba(16, 185, 129, 0.6) 0%,
+      transparent 70%
+    );
+    animation: pulse 0.5s linear infinite;
+    animation-delay: 0.25s;
+  }
+</style>
+{% endblock %}

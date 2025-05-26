@@ -1,0 +1,439 @@
+.gradient-bg {
+        background: linear-gradient(to bottom, #2f4f4f, #2e4b5c);
+      }
+
+      .main-container {
+        height: calc(100vh - 5rem);
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .participant-grid {
+        flex: 1;
+        display: grid;
+        gap: 0.5rem;
+        padding: 1rem;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        align-items: center;
+        justify-items: center;
+      }
+
+      .participant-item {
+        width: 100%;
+        height: 100%;
+        max-width: 100%;
+        max-height: 100%;
+        border-radius: 8px;
+        overflow: hidden;
+        background: rgba(0, 0, 0, 0.4);
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .participant-video {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: center;
+      }
+
+      .participant-info {
+        position: absolute;
+        left: 0;
+        bottom: 0;
+        width: 100%;
+        background: rgba(0, 0, 0, 0.7);
+        padding: 0.5rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 0.875rem;
+        backdrop-filter: blur(10px);
+      }
+
+      /* Dynamic grid classes based on participant count */
+      .grid-1 {
+        grid-template-columns: 1fr;
+        grid-template-rows: 1fr;
+      }
+
+      .grid-2 {
+        grid-template-columns: 1fr 1fr;
+        grid-template-rows: 1fr;
+      }
+
+      .grid-3 {
+        grid-template-columns: 1fr 1fr;
+        grid-template-rows: 1fr 1fr;
+      }
+
+      .grid-4 {
+        grid-template-columns: 1fr 1fr;
+        grid-template-rows: 1fr 1fr;
+      }
+
+      .grid-5,
+      .grid-6 {
+        grid-template-columns: 1fr 1fr 1fr;
+        grid-template-rows: 1fr 1fr;
+      }
+
+      .grid-7,
+      .grid-8,
+      .grid-9 {
+        grid-template-columns: 1fr 1fr 1fr;
+        grid-template-rows: 1fr 1fr 1fr;
+      }
+
+      .grid-10,
+      .grid-11,
+      .grid-12 {
+        grid-template-columns: 1fr 1fr 1fr 1fr;
+        grid-template-rows: 1fr 1fr 1fr;
+      }
+
+      .grid-13,
+      .grid-14,
+      .grid-15,
+      .grid-16 {
+        grid-template-columns: 1fr 1fr 1fr 1fr;
+        grid-template-rows: 1fr 1fr 1fr 1fr;
+      }
+
+      /* Responsive breakpoints */
+      @media (max-width: 1024px) {
+        .grid-5,
+        .grid-6,
+        .grid-7,
+        .grid-8,
+        .grid-9 {
+          grid-template-columns: 1fr 1fr;
+          grid-template-rows: repeat(auto-fit, 1fr);
+        }
+
+        .grid-10,
+        .grid-11,
+        .grid-12,
+        .grid-13,
+        .grid-14,
+        .grid-15,
+        .grid-16 {
+          grid-template-columns: 1fr 1fr 1fr;
+          grid-template-rows: repeat(auto-fit, 1fr);
+        }
+      }
+
+      @media (max-width: 768px) {
+        .participant-grid {
+          gap: 0.25rem;
+          padding: 0.5rem;
+        }
+
+        .grid-3,
+        .grid-4,
+        .grid-5,
+        .grid-6 {
+          grid-template-columns: 1fr 1fr;
+          grid-template-rows: repeat(auto-fit, 1fr);
+        }
+
+        .grid-7,
+        .grid-8,
+        .grid-9,
+        .grid-10,
+        .grid-11,
+        .grid-12,
+        .grid-13,
+        .grid-14,
+        .grid-15,
+        .grid-16 {
+          grid-template-columns: 1fr 1fr;
+          grid-template-rows: repeat(auto-fit, 1fr);
+        }
+
+        .participant-info {
+          font-size: 0.75rem;
+          padding: 0.25rem;
+        }
+      }
+
+      @media (max-width: 480px) {
+        .grid-1,
+        .grid-2,
+        .grid-3,
+        .grid-4,
+        .grid-5,
+        .grid-6,
+        .grid-7,
+        .grid-8,
+        .grid-9,
+        .grid-10,
+        .grid-11,
+        .grid-12,
+        .grid-13,
+        .grid-14,
+        .grid-15,
+        .grid-16 {
+          grid-template-columns: 1fr;
+          grid-template-rows: repeat(auto-fit, minmax(200px, 1fr));
+        }
+
+        .participant-grid {
+          overflow-y: auto;
+        }
+      }
+
+      .btn-icon {
+        width: 3rem;
+        height: 3rem;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: transform 0.2s, background-color 0.2s;
+        position: relative;
+      }
+      .btn-icon:hover {
+        transform: scale(1.1);
+      }
+      .btn-icon.active {
+        background-color: rgb(239 68 68);
+      }
+
+      /* Microphone animation for main room */
+      .mic-animation {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%) scale(1);
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        pointer-events: none;
+      }
+
+      .mic-animation::before,
+      .mic-animation::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        border-radius: 50%;
+        animation: pulse 2s linear infinite;
+      }
+
+      .mic-animation::before {
+        background: radial-gradient(
+          circle,
+          rgba(59, 130, 246, 0.6) 0%,
+          transparent 70%
+        );
+        animation-delay: 0s;
+      }
+
+      .mic-animation::after {
+        background: radial-gradient(
+          circle,
+          rgba(147, 51, 234, 0.5) 0%,
+          transparent 70%
+        );
+        animation-delay: 0.5s;
+      }
+
+      @keyframes pulse {
+        0% {
+          transform: scale(0.95);
+          opacity: 0.5;
+        }
+        50% {
+          transform: scale(1.05);
+          opacity: 0.3;
+        }
+        100% {
+          transform: scale(0.95);
+          opacity: 0.5;
+        }
+      }
+
+      .speaking .mic-animation::before {
+        background: radial-gradient(
+          circle,
+          rgba(52, 211, 153, 0.7) 0%,
+          transparent 70%
+        );
+        animation: pulse 0.5s linear infinite;
+      }
+
+      .speaking .mic-animation::after {
+        background: radial-gradient(
+          circle,
+          rgba(16, 185, 129, 0.6) 0%,
+          transparent 70%
+        );
+        animation: pulse 0.5s linear infinite;
+        animation-delay: 0.25s;
+      }
+
+      .chat-container {
+        position: absolute;
+        right: 0;
+        top: 0;
+        bottom: 0;
+        width: 0;
+        background: rgba(0, 0, 0, 0.8);
+        transition: width 0.3s ease-in-out;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        z-index: 20;
+      }
+      .chat-container.open {
+        width: 350px;
+      }
+      .chat-messages {
+        flex-grow: 1;
+        padding: 1rem;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+      .message {
+        background: rgba(255, 255, 255, 0.1);
+        padding: 0.5rem;
+        border-radius: 0.5rem;
+        max-width: 80%;
+      }
+      .message.own {
+        align-self: flex-end;
+        background: rgba(59, 130, 246, 0.5);
+      }
+      .screen-sharing {
+        border: 2px solid #4ade80;
+      }
+      .full-screen-participant {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: calc(100% - 5rem);
+        z-index: 10;
+        background: rgba(0, 0, 0, 0.9);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .full-screen-participant video {
+        max-width: 100%;
+        max-height: 100%;
+      }
+      .hidden {
+        display: none;
+      }
+      .mic-disabled::after {
+        content: "";
+        position: absolute;
+        width: 2px;
+        height: 100%;
+        background-color: red;
+        top: 0;
+        left: 50%;
+        transform: rotate(45deg);
+      }
+      .camera-disabled::after {
+        content: "";
+        position: absolute;
+        width: 2px;
+        height: 100%;
+        background-color: red;
+        top: 0;
+        left: 50%;
+        transform: rotate(45deg);
+      }
+
+      /* Participant count display */
+      .participant-count {
+        position: absolute;
+        top: 1rem;
+        left: 1rem;
+        background: rgba(0, 0, 0, 0.8);
+        padding: 0.5rem 1rem;
+        border-radius: 2rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        z-index: 5;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+      }
+
+      /* Noise Reduction Button Styles */
+      .btn-icon.bg-purple-700 {
+        background-color: rgb(126 34 206);
+      }
+      
+      .btn-icon.bg-purple-700:hover {
+        background-color: rgb(147 51 234);
+      }
+      
+      .btn-icon.bg-purple-700.active {
+        background-color: rgb(147 51 234);
+        box-shadow: 0 0 20px rgba(147, 51, 234, 0.5);
+        animation: pulse-purple 2s linear infinite;
+      }
+      
+      @keyframes pulse-purple {
+        0% {
+          box-shadow: 0 0 20px rgba(147, 51, 234, 0.5);
+        }
+        50% {
+          box-shadow: 0 0 30px rgba(147, 51, 234, 0.8);
+        }
+        100% {
+          box-shadow: 0 0 20px rgba(147, 51, 234, 0.5);
+        }
+      }
+
+      /* Loading spinner for noise reduction button */
+      .loading-spinner {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 20px;
+        height: 20px;
+        border: 2px solid transparent;
+        border-top: 2px solid white;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+      }
+
+      @keyframes spin {
+        0% { transform: translate(-50%, -50%) rotate(0deg); }
+        100% { transform: translate(-50%, -50%) rotate(360deg); }
+      }
+
+      /* Noise reduction icon styles */
+      .noise-reduction-icon {
+        position: relative;
+      }
+      
+      .noise-reduction-icon i {
+        animation: magic-glow 2s ease-in-out infinite;
+      }
+      
+      @keyframes magic-glow {
+        0%, 100% {
+          text-shadow: 0 0 5px rgba(147, 51, 234, 0.5);
+        }
+        50% {
+          text-shadow: 0 0 15px rgba(147, 51, 234, 0.8);
+        }
+      }

@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{% block title %}Video Call App{% endblock %}</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+    />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.6.2/socket.io.js"></script>
+    <style>
+      .video-container {
+        position: relative;
+        background: #1f2937;
+      }
+      .video-placeholder {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        font-size: 2rem;
+        font-weight: bold;
+      }
+      .controls-hidden {
+        opacity: 0;
+        pointer-events: none;
+      }
+      .fade-in {
+        animation: fadeIn 0.3s ease-in;
+      }
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+        }
+        to {
+          opacity: 1;
+        }
+      }
+    </style>
+  </head>
+  <body class="bg-gray-900 text-white flex flex-col h-screen">
+    <nav class="bg-gray-800 border-b border-gray-700 px-6 py-4">
+      <div class="flex items-center justify-between">
+        <h1 class="text-xl font-bold text-blue-400">
+          <a href="/"><i class="fa-solid fa-volume-high"></i> Audio Reduce</a>
+        </h1>
+        <div class="flex items-center space-x-4">
+          {% block nav_items %}{% endblock %}
+        </div>
+      </div>
+    </nav>
+
+    <main
+      class="flex-grow overflow-y-auto overflow-x-hidden"
+      style="-webkit-overflow-scrolling: touch"
+    >
+      {% block content %}{% endblock %}
+    </main>
+
+    <script>
+      // Đảm bảo touch scrolling hoạt động trên mobile
+      document.addEventListener("DOMContentLoaded", function () {
+        const mainElement = document.querySelector("main");
+
+        // Thêm class cho mobile scrolling
+        mainElement.style.webkitOverflowScrolling = "touch";
+
+        // Xử lý touch events để đảm bảo scrolling mượt
+        let isScrolling = false;
+
+        mainElement.addEventListener("touchstart", function () {
+          isScrolling = true;
+        });
+
+        mainElement.addEventListener("touchend", function () {
+          isScrolling = false;
+        });
+      });
+    </script>
+
+    {% block scripts %}{% endblock %}
+  </body>
+</html>

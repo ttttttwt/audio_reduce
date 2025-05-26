@@ -1,0 +1,162 @@
+{% extends "base.html" %} {% block title %}Trang chủ - Video Call App{% endblock
+%} {% block nav_items %}
+<a href="/" class="text-gray-300 hover:text-white transition-colors">
+  <i class="fas fa-home mr-1"></i>Trang chủ
+</a>
+{% endblock %} {% block content %}
+<div class="container mx-auto px-4 py-12">
+  <div class="max-w-4xl mx-auto text-center">
+    <div class="mb-12">
+      <h1
+        class="text-5xl font-bold mb-6 bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent"
+      >
+        Chào mừng đến Video Call App
+      </h1>
+      <p class="text-xl text-gray-300 mb-8">
+        Ứng dụng gọi video trực tuyến với chất lượng cao, bảo mật và dễ sử dụng
+      </p>
+    </div>
+
+    <div class="grid md:grid-cols-2 gap-8 mb-12">
+      <!-- Tạo phòng mới -->
+      <div
+        class="bg-gray-800 rounded-xl p-8 border border-gray-700 hover:border-blue-500 transition-colors"
+      >
+        <div class="mb-6">
+          <i class="fas fa-plus-circle text-4xl text-blue-400 mb-4"></i>
+          <h2 class="text-2xl font-bold mb-3">Tạo phòng họp mới</h2>
+          <p class="text-gray-400">
+            Tạo phòng họp ngay lập tức và mời bạn bè tham gia
+          </p>
+        </div>
+
+        <div class="mb-6">
+          <input
+            type="text"
+            id="createUsername"
+            placeholder="Nhập tên của bạn"
+            class="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg focus:border-blue-500 focus:outline-none text-white"
+          />
+        </div>
+
+        <button
+          onclick="createRoom()"
+          class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition-colors flex items-center justify-center"
+        >
+          <i class="fas fa-video mr-2"></i>
+          Tạo phòng họp
+        </button>
+      </div>
+
+      <!-- Tham gia phòng -->
+      <div
+        class="bg-gray-800 rounded-xl p-8 border border-gray-700 hover:border-green-500 transition-colors"
+      >
+        <div class="mb-6">
+          <i class="fas fa-door-open text-4xl text-green-400 mb-4"></i>
+          <h2 class="text-2xl font-bold mb-3">Tham gia phòng họp</h2>
+          <p class="text-gray-400">
+            Nhập mã phòng để tham gia cuộc họp đang diễn ra
+          </p>
+        </div>
+
+        <div class="space-y-4 mb-6">
+          <input
+            type="text"
+            id="joinUsername"
+            placeholder="Nhập tên của bạn"
+            class="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg focus:border-green-500 focus:outline-none text-white"
+          />
+          <input
+            type="text"
+            id="roomId"
+            placeholder="Nhập mã phòng"
+            class="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg focus:border-green-500 focus:outline-none text-white"
+          />
+        </div>
+
+        <button
+          onclick="joinRoom()"
+          class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg transition-colors flex items-center justify-center"
+        >
+          <i class="fas fa-sign-in-alt mr-2"></i>
+          Tham gia ngay
+        </button>
+      </div>
+    </div>
+
+    <!-- Tính năng -->
+    <div class="grid md:grid-cols-3 gap-6">
+      <div class="bg-gray-800 rounded-lg p-6 border border-gray-700">
+        <i class="fas fa-shield-alt text-3xl text-blue-400 mb-4"></i>
+        <h3 class="text-lg font-bold mb-2">Bảo mật cao</h3>
+        <p class="text-gray-400 text-sm">
+          Mã hóa end-to-end đảm bảo cuộc trò chuyện riêng tư
+        </p>
+      </div>
+      <div class="bg-gray-800 rounded-lg p-6 border border-gray-700">
+        <i class="fas fa-users text-3xl text-green-400 mb-4"></i>
+        <h3 class="text-lg font-bold mb-2">Nhiều người tham gia</h3>
+        <p class="text-gray-400 text-sm">
+          Hỗ trợ nhiều người cùng tham gia một cuộc họp
+        </p>
+      </div>
+      <div class="bg-gray-800 rounded-lg p-6 border border-gray-700">
+        <i class="fas fa-comments text-3xl text-purple-400 mb-4"></i>
+        <h3 class="text-lg font-bold mb-2">Chat trực tiếp</h3>
+        <p class="text-gray-400 text-sm">Nhắn tin realtime trong cuộc họp</p>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %} {% block scripts %}
+<script>
+  const socket = io();
+
+  function createRoom() {
+    const username = document.getElementById("createUsername").value.trim();
+    if (!username) {
+      alert("Vui lòng nhập tên của bạn");
+      return;
+    }
+
+    socket.emit("create_room", { username: username });
+  }
+
+  function joinRoom() {
+    const username = document.getElementById("joinUsername").value.trim();
+    const roomId = document.getElementById("roomId").value.trim();
+
+    if (!username || !roomId) {
+      alert("Vui lòng nhập đầy đủ thông tin");
+      return;
+    }
+
+    window.location.href = `/lobby/${roomId}?username=${encodeURIComponent(
+      username
+    )}`;
+  }
+
+  socket.on("room_created", function (data) {
+    // When creating a room, go to lobby first
+    window.location.href = `/lobby/${
+      data.room_id
+    }?username=${encodeURIComponent(data.username)}`;
+  });
+
+  socket.on("error", function (data) {
+    alert(data.message);
+  });
+
+  // Enter key support
+  document
+    .getElementById("createUsername")
+    .addEventListener("keypress", function (e) {
+      if (e.key === "Enter") createRoom();
+    });
+
+  document.getElementById("roomId").addEventListener("keypress", function (e) {
+    if (e.key === "Enter") joinRoom();
+  });
+</script>
+{% endblock %}

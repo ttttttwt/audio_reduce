@@ -1,0 +1,144 @@
+{% extends "base.html" %} {% block title %}Audio Reduce App - Trang chủ{%
+endblock %} {% block content %}
+<div class="container mx-auto px-4 py-12">
+  <div class="max-w-6xl mx-auto text-center">
+    <!-- Header Section -->
+    <div class="mb-16">
+      <h1
+        class="text-6xl font-bold mb-6 bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 bg-clip-text text-transparent"
+      >
+        Audio Reduce App
+      </h1>
+      <p class="text-2xl text-gray-300 mb-4">
+        Ứng dụng xử lý âm thanh với công nghệ AI tiên tiến
+      </p>
+      <p class="text-lg text-gray-400">
+        Loại bỏ tiếng ồn, cải thiện chất lượng âm thanh cho mọi nhu cầu của bạn
+      </p>
+    </div>
+
+    <!-- Main Features Grid -->
+    <div class="grid lg:grid-cols-3 md:grid-cols-2 gap-8 mb-16">
+      <!-- Video Call with Audio Reduce -->
+      <div
+        class="bg-gradient-to-br from-blue-800 to-blue-900 rounded-2xl p-8 border border-blue-600 hover:border-blue-400 transition-all duration-300 hover:shadow-2xl hover:shadow-blue-500/20 cursor-pointer group"
+        onclick="window.location.href='/video'"
+      >
+        <div class="mb-6">
+          <div class="flex justify-center mb-4">
+            <div
+              class="bg-blue-500 rounded-full p-4 group-hover:scale-110 transition-transform duration-300"
+            >
+              <i class="fas fa-video text-3xl text-white"></i>
+              <i class="fas fa-wave-square text-2xl text-white ml-2"></i>
+            </div>
+          </div>
+          <h2 class="text-2xl font-bold mb-4 text-white">
+            Video Call with Audio Reduce
+          </h2>
+          <p class="text-blue-200 mb-6 leading-relaxed">
+            Gọi video với âm thanh được xử lý noise reduction real-time. Trải
+            nghiệm cuộc gọi chất lượng cao không tiếng ồn.
+          </p>
+        </div>
+        <div
+          class="flex items-center justify-center text-blue-300 group-hover:text-white transition-colors"
+        >
+          <span class="font-semibold mr-2">Bắt đầu gọi video</span>
+          <i
+            class="fas fa-arrow-right group-hover:translate-x-1 transition-transform"
+          ></i>
+        </div>
+      </div>
+
+      <!-- Process Audio File -->
+      <div
+        class="bg-gradient-to-br from-green-800 to-green-900 rounded-2xl p-8 border border-green-600 hover:border-green-400 transition-all duration-300 hover:shadow-2xl hover:shadow-green-500/20 cursor-pointer group"
+        onclick="window.location.href='/process-audio'"
+      >
+        <div class="mb-6">
+          <div class="flex justify-center mb-4">
+            <div
+              class="bg-green-500 rounded-full p-4 group-hover:scale-110 transition-transform duration-300"
+            >
+              <i class="fas fa-file-audio text-3xl text-white"></i>
+              <i class="fas fa-upload text-2xl text-white ml-2"></i>
+            </div>
+          </div>
+          <h2 class="text-2xl font-bold mb-4 text-white">Process Audio File</h2>
+          <p class="text-green-200 mb-6 leading-relaxed">
+            Upload file audio (MP3, WAV) và xử lý noise reduction. Tải xuống
+            file đã được cải thiện chất lượng.
+          </p>
+        </div>
+        <div
+          class="flex items-center justify-center text-green-300 group-hover:text-white transition-colors"
+        >
+          <span class="font-semibold mr-2">Xử lý file audio</span>
+          <i
+            class="fas fa-arrow-right group-hover:translate-x-1 transition-transform"
+          ></i>
+        </div>
+      </div>
+
+      <!-- Real-time Audio Processing -->
+      <div
+        class="bg-gradient-to-br from-purple-800 to-purple-900 rounded-2xl p-8 border border-purple-600 hover:border-purple-400 transition-all duration-300 hover:shadow-2xl hover:shadow-purple-500/20 cursor-pointer group lg:col-span-1 md:col-span-2 lg:col-span-1"
+        onclick="window.location.href='/realtime-audio'"
+      >
+        <div class="mb-6">
+          <div class="flex justify-center mb-4">
+            <div
+              class="bg-purple-500 rounded-full p-4 group-hover:scale-110 transition-transform duration-300"
+            >
+              <i class="fas fa-microphone text-3xl text-white"></i>
+              <i class="fas fa-broadcast-tower text-2xl text-white ml-2"></i>
+            </div>
+          </div>
+          <h2 class="text-2xl font-bold mb-4 text-white">
+            Real-time Audio Processing
+          </h2>
+          <p class="text-purple-200 mb-6 leading-relaxed">
+            Thu âm trực tiếp và xử lý noise reduction real-time. Xem waveform và
+            lưu bản ghi đã xử lý.
+          </p>
+        </div>
+        <div
+          class="flex items-center justify-center text-purple-300 group-hover:text-white transition-colors"
+        >
+          <span class="font-semibold mr-2">Thu âm trực tiếp</span>
+          <i
+            class="fas fa-arrow-right group-hover:translate-x-1 transition-transform"
+          ></i>
+        </div>
+      </div>
+    </div>
+
+    <!-- Features Highlight -->
+    <div class="grid md:grid-cols-4 gap-6">
+      <div class="bg-gray-800 rounded-lg p-6 border border-gray-700">
+        <i class="fas fa-robot text-3xl text-blue-400 mb-4"></i>
+        <h3 class="text-lg font-bold mb-2">AI Technology</h3>
+        <p class="text-gray-400 text-sm">
+          Công nghệ AI tiên tiến để loại bỏ noise
+        </p>
+      </div>
+      <div class="bg-gray-800 rounded-lg p-6 border border-gray-700">
+        <i class="fas fa-clock text-3xl text-green-400 mb-4"></i>
+        <h3 class="text-lg font-bold mb-2">Real-time</h3>
+        <p class="text-gray-400 text-sm">Xử lý âm thanh trong thời gian thực</p>
+      </div>
+      <div class="bg-gray-800 rounded-lg p-6 border border-gray-700">
+        <i class="fas fa-shield-alt text-3xl text-purple-400 mb-4"></i>
+        <h3 class="text-lg font-bold mb-2">Bảo mật</h3>
+        <p class="text-gray-400 text-sm">Dữ liệu được bảo vệ và xử lý cục bộ</p>
+      </div>
+      <div class="bg-gray-800 rounded-lg p-6 border border-gray-700">
+        <i class="fas fa-download text-3xl text-orange-400 mb-4"></i>
+        <h3 class="text-lg font-bold mb-2">Export</h3>
+        <p class="text-gray-400 text-sm">Tải xuống file chất lượng cao</p>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

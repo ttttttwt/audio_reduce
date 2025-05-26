@@ -1,0 +1,384 @@
+{% extends "base.html" %} {% block title %}Process Audio File - Audio Reduce
+App{% endblock %} {% block nav_items %}
+<a href="/" class="text-gray-300 hover:text-white transition-colors">
+  <i class="fas fa-home mr-1"></i>Trang chủ
+</a>
+{% endblock %} {% block head %}
+<!-- Process Audio Specific Styles -->
+<link
+  rel="stylesheet"
+  href="{{ url_for('static', filename='css/process.css') }}"
+/>
+{% endblock %} {% block content %}
+<div
+  class="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900 overflow-x-hidden"
+>
+  <div class="container mx-auto px-4 py-6 max-w-7xl">
+    <div class="w-full">
+      <!-- Header -->
+      <div class="text-center mb-8">
+        <h1
+          class="text-3xl md:text-4xl lg:text-5xl font-bold mb-4 bg-gradient-to-r from-green-400 via-blue-500 to-purple-600 bg-clip-text text-transparent leading-tight"
+        >
+          AI Audio Enhancement
+        </h1>
+        <p class="text-lg md:text-xl text-gray-300 px-4">
+          Loại bỏ noise và cải thiện chất lượng âm thanh bằng AI
+        </p>
+      </div>
+
+      <!-- Upload Section -->
+      <div
+        class="backdrop-blur-lg bg-white/10 rounded-2xl p-4 md:p-6 lg:p-8 border border-white/20 shadow-2xl mb-6"
+      >
+        <div class="text-center">
+          <div
+            id="upload-area"
+            class="border-2 border-dashed border-gray-400/50 rounded-xl p-8 md:p-12 mb-6 hover:border-green-400 hover:bg-green-400/5 transition-all cursor-pointer group"
+          >
+            <div class="flex flex-col items-center">
+              <i
+                class="fas fa-cloud-upload-alt text-4xl md:text-6xl text-gray-400 group-hover:text-green-400 transition-colors mb-4"
+              ></i>
+              <p class="text-lg md:text-xl text-gray-300 mb-2">
+                Kéo thả file hoặc click để chọn
+              </p>
+              <p class="text-sm md:text-base text-gray-500 text-center">
+                Hỗ trợ: MP3, WAV, FLAC, AAC, OGG (tối đa 50MB)
+              </p>
+            </div>
+            <input
+              type="file"
+              id="audio-file"
+              accept=".mp3,.wav,.flac,.aac,.ogg,.m4a"
+              class="hidden"
+            />
+          </div>
+
+          <!-- File Info Display -->
+          <div
+            id="file-info"
+            class="hidden backdrop-blur-lg bg-white/10 rounded-xl p-4 md:p-6 mb-6 border border-white/20"
+          >
+            <div
+              class="flex flex-col sm:flex-row items-center justify-between gap-4"
+            >
+              <div class="flex items-center space-x-4 min-w-0 flex-1">
+                <div
+                  class="w-12 h-12 md:w-16 md:h-16 bg-gradient-to-r from-green-400 to-blue-500 rounded-xl flex items-center justify-center flex-shrink-0"
+                >
+                  <i
+                    class="fas fa-file-audio text-white text-xl md:text-2xl"
+                  ></i>
+                </div>
+                <div class="text-left min-w-0 flex-1">
+                  <p
+                    id="file-name"
+                    class="font-semibold text-base md:text-lg text-white truncate"
+                  ></p>
+                  <div
+                    class="flex flex-col sm:flex-row sm:space-x-4 text-xs md:text-sm text-gray-300"
+                  >
+                    <span id="file-size"></span>
+                    <span id="file-duration"></span>
+                    <span id="file-format"></span>
+                  </div>
+                </div>
+              </div>
+              <button
+                id="remove-file"
+                class="w-10 h-10 bg-red-500/20 hover:bg-red-500/30 rounded-lg flex items-center justify-center text-red-400 hover:text-red-300 transition-colors flex-shrink-0"
+              >
+                <i class="fas fa-times"></i>
+              </button>
+            </div>
+          </div>
+
+          <button
+            id="process-btn"
+            class="w-full sm:w-auto bg-gradient-to-r from-green-500 to-blue-600 hover:from-green-600 hover:to-blue-700 text-white font-bold py-3 md:py-4 px-8 md:px-12 rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg text-sm md:text-base"
+            disabled
+          >
+            <i class="fas fa-magic mr-2"></i>
+            Xử lý Audio với AI
+          </button>
+        </div>
+      </div>
+
+      <!-- Processing Section -->
+      <div
+        id="processing-section"
+        class="hidden backdrop-blur-lg bg-white/10 rounded-2xl p-4 md:p-6 lg:p-8 border border-white/20 shadow-2xl mb-6"
+      >
+        <div class="text-center">
+          <div class="mb-6">
+            <div
+              class="inline-block animate-spin rounded-full h-12 w-12 md:h-16 md:w-16 border-b-4 border-green-400"
+            ></div>
+          </div>
+          <h3 class="text-xl md:text-2xl font-bold mb-4 text-white">
+            Đang xử lý audio với AI...
+          </h3>
+          <p
+            id="processing-step"
+            class="text-gray-300 mb-6 text-sm md:text-base"
+          >
+            Đang chuẩn bị...
+          </p>
+
+          <!-- Progress Bar -->
+          <div class="max-w-md mx-auto mb-6">
+            <div class="bg-gray-700/50 rounded-full h-2 md:h-3 mb-2">
+              <div
+                id="progress-bar"
+                class="bg-gradient-to-r from-green-400 to-blue-500 h-2 md:h-3 rounded-full transition-all duration-500"
+                style="width: 0%"
+              ></div>
+            </div>
+            <p id="progress-text" class="text-xs md:text-sm text-gray-400">
+              0%
+            </p>
+          </div>
+
+          <!-- Processing Steps -->
+          <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
+            <div id="step-1" class="step-item opacity-50">
+              <div
+                class="w-10 h-10 md:w-12 md:h-12 bg-blue-500/20 rounded-lg mx-auto mb-2 flex items-center justify-center"
+              >
+                <i class="fas fa-upload text-blue-400 text-sm md:text-base"></i>
+              </div>
+              <p class="text-xs md:text-sm text-gray-400">Tải file</p>
+            </div>
+            <div id="step-2" class="step-item opacity-50">
+              <div
+                class="w-10 h-10 md:w-12 md:h-12 bg-yellow-500/20 rounded-lg mx-auto mb-2 flex items-center justify-center"
+              >
+                <i
+                  class="fas fa-chart-line text-yellow-400 text-sm md:text-base"
+                ></i>
+              </div>
+              <p class="text-xs md:text-sm text-gray-400">Phân tích</p>
+            </div>
+            <div id="step-3" class="step-item opacity-50">
+              <div
+                class="w-10 h-10 md:w-12 md:h-12 bg-purple-500/20 rounded-lg mx-auto mb-2 flex items-center justify-center"
+              >
+                <i
+                  class="fas fa-brain text-purple-400 text-sm md:text-base"
+                ></i>
+              </div>
+              <p class="text-xs md:text-sm text-gray-400">AI xử lý</p>
+            </div>
+            <div id="step-4" class="step-item opacity-50">
+              <div
+                class="w-10 h-10 md:w-12 md:h-12 bg-green-500/20 rounded-lg mx-auto mb-2 flex items-center justify-center"
+              >
+                <i class="fas fa-check text-green-400 text-sm md:text-base"></i>
+              </div>
+              <p class="text-xs md:text-sm text-gray-400">Hoàn thành</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Results Section -->
+      <div id="results-section" class="hidden">
+        <!-- Metrics Dashboard -->
+        <div
+          id="metrics-dashboard"
+          class="backdrop-blur-lg bg-white/10 rounded-2xl p-4 md:p-6 border border-white/20 shadow-2xl mb-6"
+        >
+          <h3 class="text-lg md:text-xl font-bold mb-4 text-center text-white">
+            <i class="fas fa-chart-bar mr-2"></i>Kết quả xử lý
+          </h3>
+          <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
+            <div class="text-center">
+              <div
+                class="text-lg md:text-2xl font-bold text-green-400"
+                id="snr-improvement"
+              >
+                +0 dB
+              </div>
+              <div class="text-xs md:text-sm text-gray-400">Cải thiện SNR</div>
+            </div>
+            <div class="text-center">
+              <div
+                class="text-lg md:text-2xl font-bold text-blue-400"
+                id="noise-reduction"
+              >
+                0%
+              </div>
+              <div class="text-xs md:text-sm text-gray-400">Giảm noise</div>
+            </div>
+            <div class="text-center">
+              <div
+                class="text-lg md:text-2xl font-bold text-purple-400"
+                id="processing-time"
+              >
+                0s
+              </div>
+              <div class="text-xs md:text-sm text-gray-400">
+                Thời gian xử lý
+              </div>
+            </div>
+            <div class="text-center">
+              <div
+                class="text-lg md:text-2xl font-bold text-yellow-400"
+                id="quality-score"
+              >
+                --
+              </div>
+              <div class="text-xs md:text-sm text-gray-400">
+                Điểm chất lượng
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Waveform Visualization -->
+        <div
+          class="backdrop-blur-lg bg-white/10 rounded-2xl p-4 md:p-6 border border-white/20 shadow-2xl mb-6"
+        >
+          <h3 class="text-lg md:text-xl font-bold mb-4 text-center text-white">
+            <i class="fas fa-wave-square mr-2"></i>So sánh Waveform
+          </h3>
+
+          <!-- Waveform Image Display -->
+          <div id="waveform-image-container" class="mb-6 text-center">
+            <img
+              id="waveform-comparison-image"
+              src=""
+              alt="Waveform Comparison"
+              class="w-full max-w-4xl mx-auto rounded-lg border border-white/20 hidden"
+            />
+            <div id="waveform-loading" class="hidden">
+              <div
+                class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-white"
+              ></div>
+              <p class="text-gray-300 mt-2">Đang tạo biểu đồ waveform...</p>
+            </div>
+          </div>
+
+          <!-- Interactive Waveform Canvas -->
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <!-- Original Waveform -->
+            <div class="bg-gray-800/50 rounded-lg p-4">
+              <h4 class="text-red-400 font-semibold mb-3 text-center">
+                <i class="fas fa-volume-up mr-2"></i>Audio gốc
+              </h4>
+              <canvas
+                id="original-waveform-canvas"
+                width="400"
+                height="150"
+                class="w-full border border-gray-600 rounded bg-gray-900"
+              ></canvas>
+              <div class="mt-2 text-xs text-gray-400 text-center">
+                <span id="original-duration">Duration: --</span> |
+                <span id="original-max-amplitude">Max: --</span>
+              </div>
+            </div>
+
+            <!-- Enhanced Waveform -->
+            <div class="bg-gray-800/50 rounded-lg p-4">
+              <h4 class="text-green-400 font-semibold mb-3 text-center">
+                <i class="fas fa-volume-down mr-2"></i>Audio đã cải thiện
+              </h4>
+              <canvas
+                id="enhanced-waveform-canvas"
+                width="400"
+                height="150"
+                class="w-full border border-gray-600 rounded bg-gray-900"
+              ></canvas>
+              <div class="mt-2 text-xs text-gray-400 text-center">
+                <span id="enhanced-duration">Duration: --</span> |
+                <span id="enhanced-max-amplitude">Max: --</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Waveform Controls -->
+          <div class="mt-4 flex justify-center space-x-4">
+            <button
+              id="toggle-waveform-view"
+              class="bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 px-4 py-2 rounded-lg transition-colors"
+            >
+              <i class="fas fa-eye mr-2"></i>Chuyển đổi hiển thị
+            </button>
+            <button
+              id="download-waveform-image"
+              class="bg-purple-500/20 hover:bg-purple-500/30 text-purple-400 px-4 py-2 rounded-lg transition-colors"
+            >
+              <i class="fas fa-download mr-2"></i>Tải ảnh waveform
+            </button>
+          </div>
+        </div>
+
+        <!-- Audio Comparison -->
+        <div class="grid grid-cols-1 xl:grid-cols-2 gap-4 md:gap-6 lg:gap-8">
+          <!-- Original Audio -->
+          <div
+            class="backdrop-blur-lg bg-white/10 rounded-2xl p-4 md:p-6 border border-white/20 shadow-2xl"
+          >
+            <h3 class="text-lg md:text-xl font-bold mb-4 text-red-400">
+              <i class="fas fa-volume-up mr-2"></i>Audio gốc
+            </h3>
+            <div class="bg-gray-800/50 rounded-lg p-3 md:p-4 mb-4">
+              <audio
+                id="original-audio"
+                controls
+                class="w-full h-8 md:h-10"
+                style="filter: hue-rotate(350deg)"
+              >
+                Your browser does not support the audio element.
+              </audio>
+            </div>
+            <div class="text-xs md:text-sm text-gray-400">
+              <p>
+                <i class="fas fa-exclamation-triangle mr-1"></i>Chứa noise và
+                tạp âm
+              </p>
+            </div>
+          </div>
+
+          <!-- Enhanced Audio -->
+          <div
+            class="backdrop-blur-lg bg-white/10 rounded-2xl p-4 md:p-6 border border-white/20 shadow-2xl"
+          >
+            <h3 class="text-lg md:text-xl font-bold mb-4 text-green-400">
+              <i class="fas fa-volume-down mr-2"></i>Audio đã cải thiện
+            </h3>
+            <div class="bg-gray-800/50 rounded-lg p-3 md:p-4 mb-4">
+              <audio
+                id="processed-audio"
+                controls
+                class="w-full h-8 md:h-10"
+                style="filter: hue-rotate(120deg)"
+              >
+                Your browser does not support the audio element.
+              </audio>
+            </div>
+            <div class="text-xs md:text-sm text-gray-400 mb-4">
+              <p>
+                <i class="fas fa-check-circle mr-1"></i>Đã loại bỏ noise và cải
+                thiện chất lượng
+              </p>
+            </div>
+            <button
+              id="download-btn"
+              class="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-bold py-2 md:py-3 px-4 rounded-xl transition-all shadow-lg text-sm md:text-base"
+            >
+              <i class="fas fa-download mr-2"></i>
+              Tải xuống file đã cải thiện
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %} {% block scripts %}
+<!-- Process Audio Specific JavaScript -->
+<script src="{{ url_for('static', filename='js/process.js') }}"></script>
+<script src="{{ url_for('static', filename='js/waveform.js') }}"></script>
+{% endblock %}

@@ -1,0 +1,1085 @@
+{% extends "base.html" %} {% block title %}Real-time Audio Processing - Audio
+Reduce App{% endblock %} {% block nav_items %}
+<a href="/" class="text-gray-300 hover:text-white transition-colors">
+  <i class="fas fa-home mr-1"></i>Trang chủ
+</a>
+{% endblock %} {% block content %}
+<div class="container mx-auto px-4 py-8">
+  <div class="max-w-6xl mx-auto">
+    <!-- Header -->
+    <div class="text-center mb-12">
+      <h1
+        class="text-4xl font-bold mb-4 bg-gradient-to-r from-purple-400 to-pink-500 bg-clip-text text-transparent"
+      >
+        Real-time Audio Processing
+      </h1>
+      <p class="text-xl text-gray-300">
+        Thu âm trực tiếp và xử lý noise reduction real-time với AI
+      </p>
+      <div id="connection-status" class="mt-4">
+        <span class="bg-yellow-600 text-white px-3 py-1 rounded-full text-sm">
+          <i class="fas fa-circle-notch fa-spin mr-1"></i>Đang kết nối...
+        </span>
+      </div>
+    </div>
+
+    <!-- Main Control Panel -->
+    <div class="bg-gray-800 rounded-xl p-8 border border-gray-700 mb-8">
+      <div class="grid md:grid-cols-3 gap-8">
+        <!-- Microphone Control -->
+        <div class="text-center">
+          <div
+            class="bg-gray-700 rounded-full w-24 h-24 flex items-center justify-center mx-auto mb-4 cursor-pointer hover:bg-gray-600 transition-colors"
+            id="mic-button"
+          >
+            <i
+              id="mic-icon"
+              class="fas fa-microphone text-3xl text-gray-400"
+            ></i>
+          </div>
+          <h3 class="text-lg font-bold mb-2">Microphone</h3>
+          <p id="mic-status" class="text-gray-400">Click để bắt đầu</p>
+        </div>
+
+        <!-- Noise Reduction Control -->
+        <div class="text-center">
+          <div
+            class="bg-gray-700 rounded-full w-24 h-24 flex items-center justify-center mx-auto mb-4"
+          >
+            <i class="fas fa-magic text-3xl text-purple-400"></i>
+          </div>
+          <h3 class="text-lg font-bold mb-2">AI Noise Reduction</h3>
+          <div class="flex items-center justify-center space-x-2">
+            <span class="text-sm">Off</span>
+            <label class="relative inline-flex items-center cursor-pointer">
+              <input
+                type="checkbox"
+                id="noise-reduction-toggle"
+                class="sr-only peer"
+              />
+              <div
+                class="w-11 h-6 bg-gray-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-500"
+              ></div>
+            </label>
+            <span class="text-sm">On</span>
+          </div>
+          <p id="ai-status" class="text-xs text-gray-500 mt-2">
+            Model: Chưa tải
+          </p>
+        </div>
+
+        <!-- Recording Control -->
+        <div class="text-center">
+          <div
+            class="bg-gray-700 rounded-full w-24 h-24 flex items-center justify-center mx-auto mb-4 cursor-pointer hover:bg-gray-600 transition-colors"
+            id="record-button"
+          >
+            <i
+              id="record-icon"
+              class="fas fa-circle text-3xl text-gray-400"
+            ></i>
+          </div>
+          <h3 class="text-lg font-bold mb-2">Recording</h3>
+          <p id="record-status" class="text-gray-400">Sẵn sàng ghi âm</p>
+          <p id="record-timer" class="text-xs text-gray-500 mt-1">00:00</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Audio Settings Panel -->
+    <div class="bg-gray-800 rounded-xl p-6 border border-gray-700 mb-8">
+      <h3 class="text-lg font-bold mb-4">
+        <i class="fas fa-cog mr-2"></i>Audio Settings
+      </h3>
+      <div class="grid md:grid-cols-3 gap-4">
+        <div>
+          <label class="block text-sm font-medium mb-2">Sample Rate</label>
+          <select
+            id="sample-rate"
+            class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2"
+          >
+            <option value="16000">16 kHz</option>
+            <option value="22050">22 kHz</option>
+            <option value="44100">44.1 kHz</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-2">Chunk Size</label>
+          <select
+            id="chunk-size"
+            class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2"
+          >
+            <option value="1024">1024</option>
+            <option value="2048" selected>2048</option>
+            <option value="4096">4096</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-2">Processing Mode</label>
+          <select
+            id="processing-mode"
+            class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2"
+          >
+            <option value="chunk">Real-time Chunks</option>
+            <option value="buffer">Buffer Processing</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Audio Visualization -->
+    <div class="grid md:grid-cols-2 gap-8 mb-8">
+      <!-- Input Audio -->
+      <div class="bg-gray-800 rounded-xl p-6 border border-gray-700">
+        <h3 class="text-xl font-bold mb-4 text-red-400">
+          <i class="fas fa-microphone mr-2"></i>Input Audio (Raw)
+        </h3>
+        <canvas
+          id="input-canvas"
+          width="400"
+          height="200"
+          class="w-full bg-gray-900 rounded"
+        ></canvas>
+        <div class="mt-4 grid grid-cols-2 gap-4 text-sm text-gray-400">
+          <div>
+            <p>
+              Volume:
+              <span id="input-volume" class="text-white font-mono">0%</span>
+            </p>
+            <p>
+              Peak:
+              <span id="input-peak" class="text-white font-mono">0.0</span>
+            </p>
+          </div>
+          <div>
+            <p>
+              Frequency:
+              <span id="input-frequency" class="text-white font-mono"
+                >0 Hz</span
+              >
+            </p>
+            <p>
+              SNR: <span id="input-snr" class="text-white font-mono">0 dB</span>
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Output Audio -->
+      <div class="bg-gray-800 rounded-xl p-6 border border-gray-700">
+        <h3 class="text-xl font-bold mb-4 text-green-400">
+          <i class="fas fa-volume-down mr-2"></i>Output Audio (AI Enhanced)
+        </h3>
+        <canvas
+          id="output-canvas"
+          width="400"
+          height="200"
+          class="w-full bg-gray-900 rounded"
+        ></canvas>
+        <div class="mt-4 grid grid-cols-2 gap-4 text-sm text-gray-400">
+          <div>
+            <p>
+              Volume:
+              <span id="output-volume" class="text-white font-mono">0%</span>
+            </p>
+            <p>
+              Peak:
+              <span id="output-peak" class="text-white font-mono">0.0</span>
+            </p>
+          </div>
+          <div>
+            <p>
+              Noise Reduced:
+              <span id="noise-reduced" class="text-green-400 font-mono"
+                >0%</span
+              >
+            </p>
+            <p>
+              Latency:
+              <span id="processing-latency" class="text-white font-mono"
+                >0 ms</span
+              >
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Performance Metrics -->
+    <div class="bg-gray-800 rounded-xl p-6 border border-gray-700 mb-8">
+      <h3 class="text-lg font-bold mb-4">
+        <i class="fas fa-chart-line mr-2"></i>Performance Metrics
+      </h3>
+      <div class="grid md:grid-cols-4 gap-4 text-center">
+        <div class="bg-gray-700 rounded-lg p-4">
+          <div class="text-2xl font-bold text-blue-400" id="chunks-processed">
+            0
+          </div>
+          <div class="text-sm text-gray-400">Chunks Processed</div>
+        </div>
+        <div class="bg-gray-700 rounded-lg p-4">
+          <div class="text-2xl font-bold text-green-400" id="avg-latency">
+            0ms
+          </div>
+          <div class="text-sm text-gray-400">Avg Latency</div>
+        </div>
+        <div class="bg-gray-700 rounded-lg p-4">
+          <div class="text-2xl font-bold text-purple-400" id="cpu-usage">
+            0%
+          </div>
+          <div class="text-sm text-gray-400">CPU Usage</div>
+        </div>
+        <div class="bg-gray-700 rounded-lg p-4">
+          <div class="text-2xl font-bold text-yellow-400" id="memory-usage">
+            0MB
+          </div>
+          <div class="text-sm text-gray-400">Memory Usage</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recording History -->
+    <div
+      id="recording-section"
+      class="hidden bg-gray-800 rounded-xl p-6 border border-gray-700"
+    >
+      <h3 class="text-xl font-bold mb-4">
+        <i class="fas fa-history mr-2"></i>Recording History
+      </h3>
+      <div id="recordings-list" class="space-y-4">
+        <!-- Recordings will be added here -->
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %} {% block scripts %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.js"></script>
+<script>
+  // WebSocket connection
+  const socket = io();
+
+  // Audio processing state
+  let isRecording = false;
+  let isMicActive = false;
+  let isNoiseReductionEnabled = false;
+  let isProcessingStarted = false;
+  let mediaRecorder = null;
+  let enhancedMediaRecorder = null; // New: for enhanced audio recording
+  let audioChunks = [];
+  let enhancedAudioChunks = []; // New: for enhanced audio chunks
+  let audioContext = null;
+  let analyser = null;
+  let microphone = null;
+  let processor = null;
+  let recordingStartTime = null;
+  let recordingTimer = null;
+  let audioWorkletNode = null; // New: for better audio processing
+  let enhancedAudioBuffer = []; // New: buffer for enhanced audio
+
+  // Performance tracking
+  let chunksProcessed = 0;
+  let latencyHistory = [];
+  let lastProcessingTime = 0;
+
+  // DOM elements
+  const micButton = document.getElementById("mic-button");
+  const micIcon = document.getElementById("mic-icon");
+  const micStatus = document.getElementById("mic-status");
+  const recordButton = document.getElementById("record-button");
+  const recordIcon = document.getElementById("record-icon");
+  const recordStatus = document.getElementById("record-status");
+  const recordTimer = document.getElementById("record-timer");
+  const noiseReductionToggle = document.getElementById(
+    "noise-reduction-toggle"
+  );
+  const inputCanvas = document.getElementById("input-canvas");
+  const outputCanvas = document.getElementById("output-canvas");
+  const recordingSection = document.getElementById("recording-section");
+  const recordingsList = document.getElementById("recordings-list");
+  const connectionStatus = document.getElementById("connection-status");
+  const aiStatus = document.getElementById("ai-status");
+
+  // Canvas contexts
+  const inputCtx = inputCanvas.getContext("2d");
+  const outputCtx = outputCanvas.getContext("2d");
+
+  // Event listeners
+  micButton.addEventListener("click", toggleMicrophone);
+  recordButton.addEventListener("click", toggleRecording);
+  noiseReductionToggle.addEventListener("change", toggleNoiseReduction);
+
+  // Settings change listeners
+  document
+    .getElementById("sample-rate")
+    .addEventListener("change", updateSettings);
+  document
+    .getElementById("chunk-size")
+    .addEventListener("change", updateSettings);
+  document
+    .getElementById("processing-mode")
+    .addEventListener("change", updateSettings);
+
+  // WebSocket event handlers
+  socket.on("connect", () => {
+    console.log("🔌 Connected to server");
+    connectionStatus.innerHTML = `
+      <span class="bg-green-600 text-white px-3 py-1 rounded-full text-sm">
+        <i class="fas fa-check-circle mr-1"></i>Đã kết nối
+      </span>
+    `;
+    checkRealtimeStatus();
+  });
+
+  socket.on("disconnect", () => {
+    console.log("❌ Disconnected from server");
+    connectionStatus.innerHTML = `
+      <span class="bg-red-600 text-white px-3 py-1 rounded-full text-sm">
+        <i class="fas fa-times-circle mr-1"></i>Mất kết nối
+      </span>
+    `;
+    // Reset all states on disconnect
+    resetAllStates();
+  });
+
+  socket.on("realtime_processing_started", (data) => {
+    console.log("✅ Real-time processing started:", data);
+    isProcessingStarted = true;
+    aiStatus.textContent = `Model: ${data.model_info.device.toUpperCase()}`;
+    aiStatus.className = "text-xs text-green-400 mt-2";
+
+    // Update toggle state if it was changed programmatically
+    if (!noiseReductionToggle.checked) {
+      noiseReductionToggle.checked = true;
+      isNoiseReductionEnabled = true;
+    }
+  });
+
+  socket.on("audio_processed", (data) => {
+    const processingTime = Date.now() - lastProcessingTime;
+    latencyHistory.push(processingTime);
+    if (latencyHistory.length > 10) latencyHistory.shift();
+
+    chunksProcessed++;
+    updatePerformanceMetrics();
+
+    // Store enhanced audio for recording
+    if (data.enhanced_audio && isNoiseReductionEnabled) {
+      try {
+        const enhancedBytes = atob(data.enhanced_audio);
+        const enhancedArray = new Float32Array(enhancedBytes.length / 4);
+        const view = new DataView(new ArrayBuffer(enhancedBytes.length));
+
+        for (let i = 0; i < enhancedBytes.length; i++) {
+          view.setUint8(i, enhancedBytes.charCodeAt(i));
+        }
+
+        for (let i = 0; i < enhancedArray.length; i++) {
+          enhancedArray[i] = view.getFloat32(i * 4, true);
+        }
+
+        // Store enhanced audio for recording
+        if (isRecording) {
+          enhancedAudioBuffer.push(enhancedArray);
+        }
+
+        // Update output visualization
+        drawProcessedWaveform(enhancedArray);
+
+        // Update metrics
+        const metrics = data.metrics || {};
+        document.getElementById("output-volume").textContent =
+          Math.round((metrics.enhanced_rms || 0) * 100) + "%";
+        document.getElementById("noise-reduced").textContent =
+          Math.round(metrics.noise_reduction_percent || 0) + "%";
+      } catch (error) {
+        console.error("Error processing enhanced audio:", error);
+      }
+    }
+  });
+
+  socket.on("processing_error", (data) => {
+    console.error("❌ Processing error:", data.error);
+    showNotification("Lỗi xử lý audio: " + data.error, "error");
+
+    // Reset processing state on error
+    if (isProcessingStarted) {
+      isProcessingStarted = false;
+      aiStatus.textContent = "Model: Lỗi xử lý";
+      aiStatus.className = "text-xs text-red-400 mt-2";
+    }
+  });
+
+  socket.on("audio_metrics", (data) => {
+    // Update input metrics display
+    document.getElementById("input-volume").textContent =
+      Math.round((data.rms || 0) * 100) + "%";
+    document.getElementById("input-peak").textContent = (
+      data.peak || 0
+    ).toFixed(3);
+    document.getElementById("input-frequency").textContent =
+      Math.round(data.dominant_frequency || 0) + " Hz";
+    document.getElementById("input-snr").textContent =
+      (data.snr_estimate || 0).toFixed(1) + " dB";
+  });
+
+  async function checkRealtimeStatus() {
+    try {
+      const response = await fetch("/api/realtime-status");
+      const data = await response.json();
+
+      if (data.status === "available") {
+        console.log("✅ Real-time processing available:", data.realtime_stats);
+        aiStatus.textContent = `Model: ${data.realtime_stats.device.toUpperCase()}`;
+        aiStatus.className = "text-xs text-blue-400 mt-2";
+      } else {
+        console.warn("⚠️ Real-time processing unavailable:", data.error);
+        aiStatus.textContent = "Model: Không khả dụng";
+        aiStatus.className = "text-xs text-red-400 mt-2";
+      }
+    } catch (error) {
+      console.error("❌ Error checking realtime status:", error);
+    }
+  }
+
+  async function toggleMicrophone() {
+    if (!isMicActive) {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({
+          audio: {
+            sampleRate: parseInt(document.getElementById("sample-rate").value),
+            channelCount: 1,
+            echoCancellation: true,
+            noiseSuppression: false, // We handle this with AI
+          },
+        });
+
+        await setupAudioContext(stream);
+        isMicActive = true;
+        micIcon.className = "fas fa-microphone text-3xl text-green-400";
+        micStatus.textContent = "Microphone ON";
+        startVisualization();
+
+        // Auto-start AI processing if noise reduction is enabled
+        if (isNoiseReductionEnabled && !isProcessingStarted) {
+          await startAIProcessing();
+        }
+
+        showNotification("Microphone đã được bật", "success");
+      } catch (error) {
+        console.error("Error accessing microphone:", error);
+        showNotification(
+          "Không thể truy cập microphone. Vui lòng kiểm tra quyền truy cập.",
+          "error"
+        );
+      }
+    } else {
+      stopMicrophone();
+    }
+  }
+
+  async function setupAudioContext(stream) {
+    audioContext = new (window.AudioContext || window.webkitAudioContext)({
+      sampleRate: parseInt(document.getElementById("sample-rate").value),
+    });
+
+    microphone = audioContext.createMediaStreamSource(stream);
+    analyser = audioContext.createAnalyser();
+    analyser.fftSize = 1024;
+    analyser.smoothingTimeConstant = 0.8;
+
+    // Create script processor for real-time processing
+    const chunkSize = parseInt(document.getElementById("chunk-size").value);
+    processor = audioContext.createScriptProcessor(chunkSize, 1, 1);
+
+    processor.onaudioprocess = (event) => {
+      if (isNoiseReductionEnabled && isProcessingStarted) {
+        const inputBuffer = event.inputBuffer.getChannelData(0);
+        processAudioChunk(inputBuffer);
+      }
+    };
+
+    // Connect audio graph
+    microphone.connect(analyser);
+    microphone.connect(processor);
+    processor.connect(audioContext.destination);
+
+    // Setup media recorder for original audio recording
+    mediaRecorder = new MediaRecorder(stream, {
+      mimeType: "audio/webm;codecs=opus",
+    });
+
+    mediaRecorder.ondataavailable = (event) => {
+      audioChunks.push(event.data);
+    };
+
+    mediaRecorder.onstop = () => {
+      const audioBlob = new Blob(audioChunks, { type: "audio/webm" });
+      audioChunks = [];
+
+      // Create enhanced audio blob if available
+      let enhancedBlob = null;
+      if (enhancedAudioBuffer.length > 0 && isNoiseReductionEnabled) {
+        enhancedBlob = createEnhancedAudioBlob();
+        enhancedAudioBuffer = []; // Clear buffer
+      }
+
+      addRecordingToHistory(audioBlob, enhancedBlob);
+    };
+  }
+
+  function processAudioChunk(audioData) {
+    lastProcessingTime = Date.now();
+
+    // Convert Float32Array to base64
+    const bytes = new Uint8Array(audioData.buffer);
+    const base64Audio = btoa(String.fromCharCode.apply(null, bytes));
+
+    const processingMode = document.getElementById("processing-mode").value;
+
+    if (processingMode === "chunk") {
+      socket.emit("process_audio_chunk", {
+        audio_data: base64Audio,
+        sample_rate: audioContext.sampleRate,
+      });
+    } else {
+      socket.emit("process_audio_buffer", {
+        audio_data: base64Audio,
+        overlap_ratio: 0.25,
+        sample_rate: audioContext.sampleRate,
+      });
+    }
+
+    // Send for metrics calculation
+    socket.emit("get_audio_metrics", {
+      audio_data: base64Audio,
+      sample_rate: audioContext.sampleRate,
+    });
+  }
+
+  function stopMicrophone() {
+    // Stop AI processing first if active
+    if (isProcessingStarted) {
+      stopAIProcessing();
+    }
+
+    if (processor) {
+      processor.disconnect();
+      processor = null;
+    }
+
+    if (audioContext) {
+      audioContext.close();
+      audioContext = null;
+    }
+
+    isMicActive = false;
+    micIcon.className = "fas fa-microphone text-3xl text-gray-400";
+    micStatus.textContent = "Click để bắt đầu";
+
+    if (isRecording) {
+      toggleRecording();
+    }
+
+    showNotification("Microphone đã được tắt", "info");
+  }
+
+  function toggleRecording() {
+    if (!isMicActive) {
+      showNotification("Vui lòng bật microphone trước khi ghi âm", "warning");
+      return;
+    }
+
+    if (!isRecording) {
+      // Clear previous enhanced audio buffer
+      enhancedAudioBuffer = [];
+
+      mediaRecorder.start();
+      isRecording = true;
+      recordingStartTime = Date.now();
+      recordIcon.className = "fas fa-stop text-3xl text-red-400";
+      recordStatus.textContent = "Đang ghi âm...";
+      startRecordingTimer();
+
+      showNotification("Đã bắt đầu ghi âm", "info");
+    } else {
+      mediaRecorder.stop();
+      isRecording = false;
+      recordIcon.className = "fas fa-circle text-3xl text-gray-400";
+      recordStatus.textContent = "Sẵn sàng ghi âm";
+      stopRecordingTimer();
+
+      showNotification("Đã dừng ghi âm", "info");
+    }
+  }
+
+  async function toggleNoiseReduction() {
+    const newState = noiseReductionToggle.checked;
+
+    if (newState && !isNoiseReductionEnabled) {
+      // Enable AI Noise Reduction
+      isNoiseReductionEnabled = true;
+
+      if (isMicActive) {
+        await startAIProcessing();
+      } else {
+        showNotification(
+          "AI Noise Reduction sẽ được bật khi microphone hoạt động",
+          "info"
+        );
+        aiStatus.textContent = "Model: Chờ microphone";
+        aiStatus.className = "text-xs text-yellow-400 mt-2";
+      }
+    } else if (!newState && isNoiseReductionEnabled) {
+      // Disable AI Noise Reduction
+      isNoiseReductionEnabled = false;
+      await stopAIProcessing();
+      showNotification("AI Noise Reduction đã được tắt", "info");
+    }
+  }
+
+  async function startAIProcessing() {
+    if (isProcessingStarted) return;
+
+    try {
+      const settings = {
+        chunk_size: parseInt(document.getElementById("chunk-size").value),
+        sample_rate: parseInt(document.getElementById("sample-rate").value),
+      };
+
+      socket.emit("start_realtime_processing", { settings });
+      aiStatus.textContent = "Model: Đang khởi động...";
+      aiStatus.className = "text-xs text-yellow-400 mt-2";
+
+      showNotification("Đang khởi động AI Noise Reduction...", "info");
+    } catch (error) {
+      console.error("Error starting AI processing:", error);
+      showNotification("Lỗi khởi động AI Noise Reduction", "error");
+    }
+  }
+
+  async function stopAIProcessing() {
+    if (!isProcessingStarted) return;
+
+    try {
+      socket.emit("stop_realtime_processing");
+      isProcessingStarted = false;
+      aiStatus.textContent = "Model: Đã tắt";
+      aiStatus.className = "text-xs text-gray-400 mt-2";
+    } catch (error) {
+      console.error("Error stopping AI processing:", error);
+    }
+  }
+
+  function createEnhancedAudioBlob() {
+    if (enhancedAudioBuffer.length === 0) return null;
+
+    try {
+      // Concatenate all enhanced audio chunks
+      let totalLength = 0;
+      enhancedAudioBuffer.forEach((chunk) => {
+        totalLength += chunk.length;
+      });
+
+      const concatenated = new Float32Array(totalLength);
+      let offset = 0;
+      enhancedAudioBuffer.forEach((chunk) => {
+        concatenated.set(chunk, offset);
+        offset += chunk.length;
+      });
+
+      // Convert to WAV format
+      const sampleRate = parseInt(document.getElementById("sample-rate").value);
+      const wavBuffer = floatToWav(concatenated, sampleRate);
+
+      return new Blob([wavBuffer], { type: "audio/wav" });
+    } catch (error) {
+      console.error("Error creating enhanced audio blob:", error);
+      return null;
+    }
+  }
+
+  function floatToWav(buffer, sampleRate) {
+    const length = buffer.length;
+    const arrayBuffer = new ArrayBuffer(44 + length * 2);
+    const view = new DataView(arrayBuffer);
+
+    // WAV header
+    const writeString = (offset, string) => {
+      for (let i = 0; i < string.length; i++) {
+        view.setUint8(offset + i, string.charCodeAt(i));
+      }
+    };
+
+    writeString(0, "RIFF");
+    view.setUint32(4, 36 + length * 2, true);
+    writeString(8, "WAVE");
+    writeString(12, "fmt ");
+    view.setUint32(16, 16, true);
+    view.setUint16(20, 1, true);
+    view.setUint16(22, 1, true);
+    view.setUint32(24, sampleRate, true);
+    view.setUint32(28, sampleRate * 2, true);
+    view.setUint16(32, 2, true);
+    view.setUint16(34, 16, true);
+    writeString(36, "data");
+    view.setUint32(40, length * 2, true);
+
+    // Convert float samples to 16-bit PCM
+    let offset = 44;
+    for (let i = 0; i < length; i++) {
+      const sample = Math.max(-1, Math.min(1, buffer[i]));
+      view.setInt16(offset, sample * 0x7fff, true);
+      offset += 2;
+    }
+
+    return arrayBuffer;
+  }
+
+  function resetAllStates() {
+    isRecording = false;
+    isMicActive = false;
+    isProcessingStarted = false;
+
+    // Reset UI
+    micIcon.className = "fas fa-microphone text-3xl text-gray-400";
+    micStatus.textContent = "Click để bắt đầu";
+    recordIcon.className = "fas fa-circle text-3xl text-gray-400";
+    recordStatus.textContent = "Sẵn sàng ghi âm";
+    aiStatus.textContent = "Model: Chưa tải";
+    aiStatus.className = "text-xs text-gray-500 mt-2";
+
+    // Clear buffers
+    audioChunks = [];
+    enhancedAudioBuffer = [];
+
+    // Stop timers
+    if (recordingTimer) {
+      clearInterval(recordingTimer);
+      recordingTimer = null;
+    }
+  }
+
+  function updateSettings() {
+    const settings = {
+      sample_rate: parseInt(document.getElementById("sample-rate").value),
+      chunk_size: parseInt(document.getElementById("chunk-size").value),
+      processing_mode: document.getElementById("processing-mode").value,
+    };
+
+    socket.emit("update_audio_settings", { settings });
+
+    // Restart processing if active
+    if (isProcessingStarted) {
+      stopAIProcessing();
+      setTimeout(async () => {
+        await startAIProcessing();
+      }, 100);
+    }
+  }
+
+  function startVisualization() {
+    const bufferLength = analyser.frequencyBinCount;
+    const dataArray = new Uint8Array(bufferLength);
+    const timeArray = new Uint8Array(analyser.fftSize);
+
+    function draw() {
+      if (!isMicActive) return;
+
+      requestAnimationFrame(draw);
+
+      // Get frequency data for spectrum visualization
+      analyser.getByteFrequencyData(dataArray);
+
+      // Get time domain data for waveform
+      analyser.getByteTimeDomainData(timeArray);
+
+      // Draw input visualization
+      drawWaveform(inputCtx, timeArray, "#ef4444");
+
+      // If no AI processing, just copy input to output
+      if (!isNoiseReductionEnabled) {
+        drawWaveform(outputCtx, timeArray, "#22c55e");
+
+        // Update volume indicators
+        const inputVolume = Math.max(...dataArray);
+        document.getElementById("input-volume").textContent =
+          Math.round((inputVolume / 255) * 100) + "%";
+        document.getElementById("output-volume").textContent =
+          Math.round((inputVolume / 255) * 100) + "%";
+        document.getElementById("noise-reduced").textContent = "0%";
+      }
+
+      document.getElementById("processing-latency").textContent =
+        latencyHistory.length > 0
+          ? Math.round(latencyHistory[latencyHistory.length - 1]) + " ms"
+          : "0 ms";
+    }
+
+    draw();
+  }
+
+  function drawWaveform(ctx, dataArray, color) {
+    const width = ctx.canvas.width;
+    const height = ctx.canvas.height;
+
+    // Clear canvas
+    ctx.fillStyle = "#111827";
+    ctx.fillRect(0, 0, width, height);
+
+    // Draw waveform
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = color;
+    ctx.beginPath();
+
+    const sliceWidth = width / dataArray.length;
+    let x = 0;
+
+    for (let i = 0; i < dataArray.length; i++) {
+      const v = (dataArray[i] - 128) / 128.0;
+      const y = height / 2 + (v * height) / 2;
+
+      if (i === 0) {
+        ctx.moveTo(x, y);
+      } else {
+        ctx.lineTo(x, y);
+      }
+
+      x += sliceWidth;
+    }
+
+    ctx.stroke();
+
+    // Draw center line
+    ctx.strokeStyle = "#374151";
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(0, height / 2);
+    ctx.lineTo(width, height / 2);
+    ctx.stroke();
+  }
+
+  function drawProcessedWaveform(audioData) {
+    const canvas = outputCanvas;
+    const ctx = outputCtx;
+    const width = canvas.width;
+    const height = canvas.height;
+
+    // Clear canvas
+    ctx.fillStyle = "#111827";
+    ctx.fillRect(0, 0, width, height);
+
+    // Draw processed waveform
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = "#22c55e";
+    ctx.beginPath();
+
+    const sliceWidth = width / audioData.length;
+    let x = 0;
+
+    for (let i = 0; i < audioData.length; i++) {
+      const y = height / 2 + (audioData[i] * height) / 2;
+
+      if (i === 0) {
+        ctx.moveTo(x, y);
+      } else {
+        ctx.lineTo(x, y);
+      }
+
+      x += sliceWidth;
+    }
+
+    ctx.stroke();
+
+    // Draw center line
+    ctx.strokeStyle = "#374151";
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(0, height / 2);
+    ctx.lineTo(width, height / 2);
+    ctx.stroke();
+  }
+
+  function startRecordingTimer() {
+    recordingTimer = setInterval(() => {
+      const elapsed = Date.now() - recordingStartTime;
+      const minutes = Math.floor(elapsed / 60000);
+      const seconds = Math.floor((elapsed % 60000) / 1000);
+      recordTimer.textContent = `${minutes
+        .toString()
+        .padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
+    }, 1000);
+  }
+
+  function stopRecordingTimer() {
+    if (recordingTimer) {
+      clearInterval(recordingTimer);
+      recordingTimer = null;
+    }
+    recordTimer.textContent = "00:00";
+  }
+
+  function updatePerformanceMetrics() {
+    document.getElementById("chunks-processed").textContent = chunksProcessed;
+
+    if (latencyHistory.length > 0) {
+      const avgLatency =
+        latencyHistory.reduce((a, b) => a + b) / latencyHistory.length;
+      document.getElementById("avg-latency").textContent =
+        Math.round(avgLatency) + "ms";
+    }
+
+    // Simulate CPU and memory usage (in a real app, get from server)
+    document.getElementById("cpu-usage").textContent =
+      Math.round(Math.random() * 30 + 10) + "%";
+    document.getElementById("memory-usage").textContent =
+      Math.round(Math.random() * 100 + 50) + "MB";
+  }
+
+  function addRecordingToHistory(originalBlob, enhancedBlob = null) {
+    recordingSection.classList.remove("hidden");
+
+    const recordingDiv = document.createElement("div");
+    recordingDiv.className = "bg-gray-700 rounded-lg p-4 space-y-3";
+
+    const timestamp = new Date().toLocaleString("vi-VN");
+    const originalUrl = URL.createObjectURL(originalBlob);
+    const recordingId = Date.now();
+
+    let enhancedUrl = null;
+    if (enhancedBlob) {
+      enhancedUrl = URL.createObjectURL(enhancedBlob);
+    }
+
+    recordingDiv.innerHTML = `
+      <div class="flex items-center justify-between">
+        <div class="flex items-center">
+          <i class="fas fa-file-audio text-2xl text-blue-400 mr-3"></i>
+          <div>
+            <p class="font-semibold">Recording ${
+              recordingsList.children.length + 1
+            }</p>
+            <p class="text-sm text-gray-400">${timestamp}</p>
+            <p class="text-xs text-gray-500">
+              Original: ${Math.round(originalBlob.size / 1024)} KB
+              ${
+                enhancedBlob
+                  ? ` • Enhanced: ${Math.round(enhancedBlob.size / 1024)} KB`
+                  : ""
+              }
+            </p>
+          </div>
+        </div>
+        <div class="flex items-center space-x-2">
+          <button onclick="downloadRecording('${originalUrl}', 'original_${recordingId}.webm')" 
+                  class="bg-blue-600 hover:bg-blue-700 px-3 py-1 rounded text-sm transition-colors"
+                  title="Download Original">
+            <i class="fas fa-download mr-1"></i>Original
+          </button>
+          ${
+            enhancedUrl
+              ? `
+            <button onclick="downloadRecording('${enhancedUrl}', 'enhanced_${recordingId}.wav')" 
+                    class="bg-purple-600 hover:bg-purple-700 px-3 py-1 rounded text-sm transition-colors"
+                    title="Download Enhanced">
+              <i class="fas fa-magic mr-1"></i>Enhanced
+            </button>
+          `
+              : ""
+          }
+          <button onclick="deleteRecording(this)" 
+                  class="bg-red-600 hover:bg-red-700 px-3 py-1 rounded text-sm transition-colors">
+            <i class="fas fa-trash"></i>
+          </button>
+        </div>
+      </div>
+      
+      <div class="space-y-2">
+        <div>
+          <p class="text-sm font-medium text-gray-300 mb-1">
+            <i class="fas fa-microphone mr-1 text-red-400"></i>Original Audio
+          </p>
+          <audio controls class="w-full h-8">
+            <source src="${originalUrl}" type="audio/webm">
+          </audio>
+        </div>
+        
+        ${
+          enhancedUrl
+            ? `
+          <div>
+            <p class="text-sm font-medium text-gray-300 mb-1">
+              <i class="fas fa-magic mr-1 text-purple-400"></i>AI Enhanced Audio
+            </p>
+            <audio controls class="w-full h-8">
+              <source src="${enhancedUrl}" type="audio/wav">
+            </audio>
+          </div>
+        `
+            : `
+          <div class="text-sm text-gray-500 italic">
+            <i class="fas fa-info-circle mr-1"></i>
+            Enhanced audio not available (AI processing was not enabled)
+          </div>
+        `
+        }
+      </div>
+    `;
+
+    recordingsList.insertBefore(recordingDiv, recordingsList.firstChild);
+    showNotification(
+      enhancedBlob
+        ? "Đã lưu recording gốc và enhanced"
+        : "Đã lưu recording gốc",
+      "success"
+    );
+  }
+
+  function downloadRecording(url, filename) {
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = filename;
+    link.click();
+  }
+
+  function deleteRecording(button) {
+    if (confirm("Bạn có chắc muốn xóa recording này?")) {
+      button.closest(".bg-gray-700").remove();
+
+      if (recordingsList.children.length === 0) {
+        recordingSection.classList.add("hidden");
+      }
+    }
+  }
+
+  function showNotification(message, type = "info") {
+    const colors = {
+      success: "bg-green-600",
+      error: "bg-red-600",
+      warning: "bg-yellow-600",
+      info: "bg-blue-600",
+    };
+
+    const notification = document.createElement("div");
+    notification.className = `fixed top-4 right-4 ${colors[type]} text-white px-4 py-2 rounded-lg shadow-lg z-50 transition-all duration-300`;
+    notification.textContent = message;
+
+    document.body.appendChild(notification);
+
+    setTimeout(() => {
+      notification.style.opacity = "0";
+      notification.style.transform = "translateX(100%)";
+      setTimeout(() => {
+        document.body.removeChild(notification);
+      }, 300);
+    }, 3000);
+  }
+
+  // Cleanup on page unload
+  window.addEventListener("beforeunload", () => {
+    if (isMicActive) {
+      stopMicrophone();
+    }
+    socket.disconnect();
+  });
+</script>
+{% endblock %}

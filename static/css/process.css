@@ -1,0 +1,330 @@
+/* Base Styles and Reset */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  overflow-x: hidden;
+}
+
+/* Step Animation Styles */
+.step-item.active {
+  opacity: 1;
+}
+
+.step-item.active .w-10,
+.step-item.active .w-12 {
+  background: linear-gradient(45deg, #10b981, #3b82f6) !important;
+}
+
+.step-item.active i {
+  color: white !important;
+}
+
+/* Audio Controls Styling */
+audio::-webkit-media-controls-panel {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+audio::-webkit-media-controls-play-button,
+audio::-webkit-media-controls-pause-button {
+  background-color: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+}
+
+audio::-webkit-media-controls-volume-slider {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+audio::-webkit-media-controls-timeline {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Text Utilities */
+.truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Animation Improvements */
+.transition-all {
+  transition-property: all;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 300ms;
+}
+
+/* Upload Area Enhancements */
+.upload-area-hover {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(59, 130, 246, 0.1));
+  border-color: #10b981;
+}
+
+/* Progress Bar Animations */
+@keyframes progressPulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(16, 185, 129, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+  }
+}
+
+.progress-bar-active {
+  animation: progressPulse 2s infinite;
+}
+
+/* Notification Styles */
+.notification {
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.notification.success {
+  background: linear-gradient(135deg, #10b981, #059669);
+}
+
+.notification.error {
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+}
+
+.notification.info {
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+}
+
+/* File Info Card Enhancements */
+.file-info-card {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Processing Animation */
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.processing-spinner {
+  animation: spin 1s linear infinite;
+}
+
+/* Results Cards */
+.results-card {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.metrics-card {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(59, 130, 246, 0.1));
+}
+
+/* Responsive Design */
+@media (max-width: 640px) {
+  .container {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  .grid {
+    gap: 0.75rem;
+  }
+
+  .text-3xl {
+    font-size: 1.875rem;
+  }
+
+  .backdrop-blur-lg {
+    backdrop-filter: blur(8px);
+  }
+
+  /* Mobile file info adjustments */
+  .file-info-mobile {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  /* Mobile button adjustments */
+  .btn-mobile {
+    width: 100%;
+    justify-content: center;
+  }
+
+  /* Mobile notification positioning */
+  .notification-mobile {
+    left: 1rem;
+    right: 1rem;
+    width: auto;
+  }
+}
+
+@media (min-width: 641px) and (max-width: 1024px) {
+  /* Tablet styles */
+  .upload-area-tablet {
+    padding: 2rem;
+  }
+
+  .processing-steps-tablet {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .max-w-7xl {
+    max-width: 80rem;
+  }
+
+  /* Desktop enhancements */
+  .upload-area-desktop {
+    padding: 3rem;
+  }
+
+  .processing-steps-desktop {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+/* High DPI Display Support */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  .backdrop-blur-lg {
+    backdrop-filter: blur(12px);
+  }
+}
+
+/* Dark Mode Enhancements */
+@media (prefers-color-scheme: dark) {
+  .upload-area {
+    border-color: rgba(255, 255, 255, 0.3);
+  }
+
+  .file-info-card {
+    background: rgba(255, 255, 255, 0.05);
+  }
+}
+
+/* Accessibility Improvements */
+@media (prefers-reduced-motion: reduce) {
+  .transition-all {
+    transition: none;
+  }
+
+  .processing-spinner {
+    animation: none;
+  }
+
+  @keyframes progressPulse {
+    0%, 100% {
+      box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4);
+    }
+  }
+}
+
+/* Focus States for Accessibility */
+.upload-area:focus-within {
+  outline: 2px solid #10b981;
+  outline-offset: 2px;
+}
+
+button:focus-visible {
+  outline: 2px solid #10b981;
+  outline-offset: 2px;
+}
+
+/* Loading States */
+.btn-loading {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.btn-loading::after {
+  content: '';
+  display: inline-block;
+  width: 1rem;
+  height: 1rem;
+  margin-left: 0.5rem;
+  border: 2px solid transparent;
+  border-top-color: currentColor;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+/* Audio Player Enhancements */
+.audio-player-container {
+  position: relative;
+  overflow: hidden;
+}
+
+.audio-player-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(45deg, rgba(16, 185, 129, 0.1), rgba(59, 130, 246, 0.1));
+  pointer-events: none;
+}
+
+/* Scrollbar Styling */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, #10b981, #3b82f6);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, #059669, #2563eb);
+}
+
+/* Print Styles */
+@media print {
+  .backdrop-blur-lg {
+    backdrop-filter: none;
+    background: white;
+    color: black;
+  }
+
+  .processing-section,
+  .upload-area {
+    display: none;
+  }
+}
+
+/* Additional Utility Classes */
+.glass-effect {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.gradient-text {
+  background: linear-gradient(135deg, #10b981, #3b82f6, #8b5cf6);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.shadow-glow {
+  box-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
+}
+
+.hover-lift:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+}
