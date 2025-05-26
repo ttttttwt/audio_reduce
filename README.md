@@ -205,16 +205,6 @@ pip install torch torchaudio --index-url https://download.pytorch.org/whl/cpu
 4. Push to branch (`git push origin feature/AmazingFeature`)
 5. Mở Pull Request
 
-## 📄 License
-
-Distributed under the MIT License. See `LICENSE` for more information.
-
-## 👥 Tác giả
-
-- **Developer**: [Tên của bạn]
-- **Email**: [Email của bạn]
-- **GitHub**: [GitHub profile của bạn]
-
 ## 🙏 Acknowledgments
 
 - [VoiceBank-DEMAND Dataset](https://datashare.ed.ac.uk/handle/10283/2791)
