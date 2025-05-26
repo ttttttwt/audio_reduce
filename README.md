@@ -163,20 +163,6 @@ socketio.run(app, debug=True, host='0.0.0.0', port=5000)  # Cấu hình server
 - **Wave-U-Net** - Convolutional neural network for audio enhancement
 - **PyTorch** - Model training và inference
 
-## 📊 Hiệu suất
-
-### Thời gian xử lý
-
-- **File processing**: ~2-5 giây cho file 1 phút
-- **Real-time**: Latency < 100ms
-- **Video call**: Real-time processing with minimal delay
-
-### Chất lượng cải thiện
-
-- **SNR improvement**: Trung bình +15dB
-- **Noise reduction**: Giảm 80-90% background noise
-- **Speech clarity**: Cải thiện đáng kể độ rõ ràng
-
 ## 🐛 Troubleshooting
 
 ### Lỗi thường gặp
